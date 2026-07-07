@@ -1,0 +1,23 @@
+{
+  // Git Settings
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.pruneOnFetch": true,
+  // Editor Settings
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit"
+  },
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.emptySelectionClipboard": true,
+  "editor.formatOnSave": true,
+  "editor.rulers": [88],
+  "editor.tabSize": 2,
+  // JSON Schemas
+  "json.schemaDownload.trustedDomains": {
+    "https://biomejs.dev": true
+  },
+  // Extensions
+  "biome.suggestInstallingGlobally": false,
+  "extensions.ignoreRecommendations": true,
+  "workbench.remoteIndicator.showExtensionRecommendations": false
+}

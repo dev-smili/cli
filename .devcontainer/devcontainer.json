@@ -1,0 +1,20 @@
+// https://aka.ms/devcontainer.json
+{
+  "name": "Dev Tools",
+  // Node + TypeScript: https://github.com/devcontainers/images/tree/main/src/typescript-node
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli": {}
+  },
+  // IDE Customizations
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "amodio.toggle-excluded-files",
+        "biomejs.biome",
+        "logerfo.open-all-files",
+        "mhutchie.git-graph"
+      ]
+    }
+  }
+}
