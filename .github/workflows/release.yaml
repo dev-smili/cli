@@ -26,6 +26,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: production # must match the environment set on the npm trusted publisher
     permissions:
       contents: write # create the GitHub Release and push the tag
       issues: write # comment on released issues
