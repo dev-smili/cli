@@ -6,7 +6,7 @@ import { defineCommand } from 'citty'
  * Returns local branches whose remote tracking branch has been deleted.
  * @returns Array of branch names that are stale
  */
-function getStaleBranches(): string[] {
+export function getStaleBranches(): string[] {
   execSync('git fetch --prune', { stdio: 'pipe' })
   const branches = execSync('git branch -vv', { encoding: 'utf-8' })
   return branches

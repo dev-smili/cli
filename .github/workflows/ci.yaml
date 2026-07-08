@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+    # `edited` so PR title changes are re-validated by the commit-lint job.
+    types: [opened, edited, synchronize, reopened]
     branches: [main]
   workflow_dispatch:
 
@@ -10,8 +12,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  commitlint:
+    name: Commit Lint
+    # Only PRs carry a title to validate (skips workflow_dispatch runs).
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Validate PR title follows Conventional Commits
+        uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+
   check:
-    name: Lint & Type Check
+    name: Lint, Type Check, Test & Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,17 +48,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: pnpm
+          cache: npm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Check
-        run: pnpm run ci
+        run: npm run ci
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build

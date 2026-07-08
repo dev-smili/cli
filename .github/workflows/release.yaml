@@ -1,0 +1,70 @@
+name: Release
+
+# Manually triggered from the Actions tab. semantic-release analyzes the Conventional
+# Commits merged into main since the last release, then determines the next version,
+# publishes to npm (OIDC trusted publishing, with provenance), creates the git tag, and
+# publishes a GitHub Release with generated notes.
+#
+# Set the `dry_run` input to preview the next version and release notes without
+# publishing, tagging, or creating a GitHub Release.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run (preview only — no publish, tag, or GitHub Release)
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the GitHub Release and push the tag
+      issues: write # comment on released issues
+      pull-requests: write # comment on released pull requests
+      id-token: write # OIDC trusted publishing + npm provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history + tags so semantic-release can find the last release
+
+      # Note: intentionally no `registry-url` — it makes setup-node write an .npmrc that
+      # conflicts with semantic-release's npm auth (EINVALIDNPMTOKEN).
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Trusted publishing (OIDC) requires npm >= 11.5.1, newer than the version bundled
+      # with the Node runtime above.
+      - name: Update npm
+        run: npm install -g npm@latest
+
+      - name: Verify provenance of dependencies
+        run: npm audit signatures
+
+      # No NPM_TOKEN: npm auth + provenance come from OIDC trusted publishing, which must
+      # be configured once on npmjs.com for this repository and this workflow file.
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            npx semantic-release --dry-run
+          else
+            npx semantic-release
+          fi

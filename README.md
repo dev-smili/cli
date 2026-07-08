@@ -3,6 +3,23 @@
 A small, dependency-light CLI of cross-repo developer utilities. Extracted from a monorepo
 so it can be shared across repositories.
 
+## Install
+
+Run it on demand with `npx`:
+
+```bash
+npx @dev-smili/cli clean-git
+npx @dev-smili/cli free-port 5173
+```
+
+Or install it globally to get the `smili` binary:
+
+```bash
+npm install -g @dev-smili/cli
+smili clean-git
+smili free-port 5173
+```
+
 ## Commands
 
 | Command                   | Description                                                     |
@@ -13,20 +30,17 @@ so it can be shared across repositories.
 
 ## Development
 
-This repo ships a devcontainer (Node 24 + TypeScript + Biome, managed via `pnpm`/corepack).
+This repo ships a devcontainer (Node 24 + TypeScript + Biome, managed via `npm`).
 Open the folder in VS Code and choose **Reopen in Container**.
 
 ```bash
-pnpm install                # installs deps (runs automatically in the devcontainer)
-pnpm run check              # biome lint + tsc type check
-pnpm run check:fix          # auto-fix lint/format issues, then type check
-pnpm exec smili clean-git   # run the CLI locally (native TS via Node 24)
-pnpm exec smili free-port 5173
+npm install                    # installs deps (runs automatically in the devcontainer)
+npm run check                  # biome lint/format (auto-fix) + tsc type check
+npm run ci                     # biome lint + tsc type check (no writes, used in CI)
+npm run test                   # run the unit tests with vitest
+npm run build                  # bundle to dist/ with tsdown
+npm run smili -- clean-git     # run the CLI locally from source (native TS via Node 24)
+npm run smili -- free-port 5173
 ```
 
-## Notes
-
-The CLI currently runs directly from TypeScript source using Node 24's native type
-stripping. Before publishing to npm it needs a build step so it runs on consumer machines
-regardless of their Node version — this and the rest of the publish checklist live in
-[plan.md](./plan.md).
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the release process.

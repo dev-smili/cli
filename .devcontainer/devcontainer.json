@@ -7,7 +7,7 @@
     "ghcr.io/devcontainers/features/github-cli": {}
   },
   // Lifecycle Scripts: https://containers.dev/implementors/json_reference/#lifecycle-scripts
-  "postCreateCommand": "sudo corepack enable && pnpm install",
+  "postCreateCommand": "npm install",
   // IDE Customizations
   "customizations": {
     "vscode": {

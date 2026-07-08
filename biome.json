@@ -42,6 +42,6 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/dist", "!**/node_modules", "!**/pnpm-lock.yaml"]
+    "includes": ["**", "!**/dist", "!**/node_modules", "!**/package-lock.json"]
   }
 }

@@ -7,7 +7,7 @@ import { defineCommand } from 'citty'
  * @param port - The TCP port number to search for
  * @returns An array of PID strings listening on the port
  */
-function findListeningPids(port: string): string[] {
+export function findListeningPids(port: string): string[] {
   if (platform() === 'win32') {
     const output = execSync(
       `netstat -ano -p TCP | findstr "LISTENING" | findstr ":${port} "`,
