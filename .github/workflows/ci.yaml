@@ -65,3 +65,21 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  # ─────────────────────────────────────────────────────────────
+  # Gate: All checks passed
+  # ─────────────────────────────────────────────────────────────
+  ci-passed:
+    name: 🚧 CI Passed
+    if: always()
+    needs: [commitlint, check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all checks passed
+        run: |
+          if [[ "${{ needs.commitlint.result }}" == "failure" ]] || \
+             [[ "${{ needs.check.result }}" == "failure" ]]; then
+            echo "::error::One or more CI jobs failed"
+            exit 1
+          fi
+          echo "All checks passed (or were skipped)"
