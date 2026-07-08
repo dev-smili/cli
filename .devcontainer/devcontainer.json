@@ -1,11 +1,13 @@
 // https://aka.ms/devcontainer.json
 {
-  "name": "Dev Tools",
+  "name": "smili",
   // Node + TypeScript: https://github.com/devcontainers/images/tree/main/src/typescript-node
   "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
   "features": {
     "ghcr.io/devcontainers/features/github-cli": {}
   },
+  // Lifecycle Scripts: https://containers.dev/implementors/json_reference/#lifecycle-scripts
+  "postCreateCommand": "sudo corepack enable && pnpm install",
   // IDE Customizations
   "customizations": {
     "vscode": {

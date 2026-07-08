@@ -1,0 +1,35 @@
+{
+  "name": "smili",
+  "version": "0.0.1",
+  "description": "Developer utility CLI",
+  "keywords": [
+    "cli",
+    "devtools",
+    "git",
+    "port",
+    "developer-experience"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "smili": "src/main.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "smili": "node src/main.ts",
+    "check": "biome check . --write && tsc --noEmit",
+    "ci": "biome check . && tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.7.0",
+    "citty": "0.2.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.2",
+    "@types/node": "24.13.2",
+    "typescript": "6.0.3"
+  }
+}
