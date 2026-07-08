@@ -35,8 +35,8 @@
   "scripts": {
     "smili": "node src/main.ts",
     "build": "tsdown",
-    "check": "biome check . --write && tsc --noEmit",
-    "ci": "biome check . && tsc --noEmit",
+    "check": "biome check . && tsc --noEmit",
+    "check:fix": "biome check . --write && tsc --noEmit",
     "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
