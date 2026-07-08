@@ -1,7 +1,6 @@
 # smili
 
-A small, dependency-light CLI of cross-repo developer utilities. Extracted from a monorepo
-so it can be shared across repositories.
+A small, dependency-light CLI of everyday developer utilities.
 
 ## Install
 
@@ -24,23 +23,11 @@ smili free-port 5173
 
 | Command                   | Description                                                     |
 | ------------------------- | --------------------------------------------------------------- |
-| `smili clean-git`         | Remove local branches whose remote tracking branch was deleted. |
+| `smili clean-git`         | Interactively remove local branches whose remote tracking branch was deleted. |
 | `smili clean-git --force` | Delete all stale branches without the interactive prompt.       |
-| `smili free-port <port>`  | Kill any process listening on the given TCP port.               |
+| `smili free-port <port>`  | Ends any process listening on the given TCP port.               |
 
-## Development
+## Contributions
 
-This repo ships a devcontainer (Node 24 + TypeScript + Biome, managed via `npm`).
-Open the folder in VS Code and choose **Reopen in Container**.
-
-```bash
-npm install                    # installs deps (runs automatically in the devcontainer)
-npm run check                  # biome lint/format (auto-fix) + tsc type check
-npm run ci                     # biome lint + tsc type check (no writes, used in CI)
-npm run test                   # run the unit tests with vitest
-npm run build                  # bundle to dist/ with tsdown
-npm run smili -- clean-git     # run the CLI locally from source (native TS via Node 24)
-npm run smili -- free-port 5173
-```
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the release process.
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development
+setup, workflow, and release process.

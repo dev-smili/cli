@@ -14,10 +14,12 @@ npm install
 ## Development workflow
 
 ```bash
-npm run smili -- clean-git   # run the CLI from source (native TS via Node 24)
-npm run check                # biome lint/format (auto-fix) + tsc type check
-npm run test                 # run the unit tests with vitest
-npm run build                # bundle to dist/ with tsdown
+npm run smili -- clean-git       # run the CLI from source (native TS via Node 24)
+npm run smili -- free-port 5173  # or any other subcommand + args
+npm run check                    # biome lint/format (auto-fix) + tsc type check
+npm run ci                       # biome lint + tsc type check (no writes, used in CI)
+npm run test                     # run the unit tests with vitest
+npm run build                    # bundle to dist/ with tsdown
 ```
 
 Before opening a pull request, make sure the following pass:

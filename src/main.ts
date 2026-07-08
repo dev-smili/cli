@@ -6,7 +6,7 @@ import freePort from './commands/free-port.ts'
 const main = defineCommand({
   meta: {
     name: 'smili',
-    description: 'Cross-repo developer utilities',
+    description: 'Everyday developer utilities',
   },
   subCommands: {
     'clean-git': cleanGit,

@@ -1,7 +1,7 @@
 {
   "name": "@dev-smili/cli",
   "version": "0.0.0",
-  "description": "Developer utility CLI",
+  "description": "Everyday developer utilities",
   "keywords": [
     "cli",
     "devtools",
