@@ -30,6 +30,8 @@ Install [Node.js][nodejs], then install the dependencies:
 npm install
 ```
 
+<br>
+
 > [!NOTE]
 > Local development requires **Node 24+**, because the CLI is run straight from its TypeScript source via Node's native type stripping. The **published** package is compiled to JavaScript and supports **Node 20+** (see `engines` in [package.json](./package.json)).
 
@@ -37,8 +39,18 @@ npm install
 
 Once you're set up, here's what to keep in mind as you work:
 
-- **Code style** — Code is formatted and linted by [Biome][biome]. Run `npm run check` to lint and type-check (no writes, matches CI), or `npm run check:fix` to auto-fix and format.
+- **Code style** — Code is formatted and linted by [Biome][biome]. Run `npm run lint` to lint or `npm run lint:fix` to auto-fix and format.
+- **Type checking** — Types are checked by the [TypeScript][typescript] compiler. Run `npm run typecheck` to type-check without emitting output.
 - **Tests** — Add or update tests for your changes and keep them passing. Tests live alongside the code in `*.test.ts` files and run with [Vitest][vitest] via `npm run test`.
+
+  <br>
+
+  > [!NOTE]
+  > Run `npm run check` to do all of the above at once — lint, type-check, and tests together, matching CI.
+
+
+Beyond the checks above, a couple of habits keep day-to-day work smooth:
+
 - **Documentation** — Update the [README](./README.md) if you add or change a command.
 - **Run from source** — Run the CLI from source while you work with `npm run smili -- <command>`:
 
