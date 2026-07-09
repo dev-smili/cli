@@ -41,13 +41,18 @@ export function findListeningPids(port: string): string[] {
 const main = defineCommand({
   meta: {
     name: 'free-port',
-    description: 'Gracefully terminate any process listening on the given TCP port',
+    description: 'Gracefully terminate (SIGTERM) any process on the given TCP port',
   },
   args: {
     port: {
       type: 'positional',
       description: 'The TCP port to free',
       required: true,
+    },
+    force: {
+      type: 'boolean',
+      description: 'Forcefully terminate (SIGKILL) any process on the given TCP port',
+      default: false,
     },
   },
   run({ args }) {
@@ -69,12 +74,15 @@ const main = defineCommand({
 
       if (platform() === 'win32') {
         for (const pid of pids) {
-          execSync(`taskkill /PID ${pid} /F`, { stdio: 'ignore' })
+          // taskkill defaults to a graceful close; `/F` forces termination.
+          const taskkillArgs = args.force ? `/PID ${pid} /F` : `/PID ${pid}`
+          execSync(`taskkill ${taskkillArgs}`, { stdio: 'ignore' })
           console.log(`Killed process ${pid} on port ${port}.`)
         }
       } else {
+        const signal = args.force ? 'SIGKILL' : 'SIGTERM'
         for (const pid of pids) {
-          process.kill(Number(pid), 'SIGTERM')
+          process.kill(Number(pid), signal)
           console.log(`Killed process ${pid} on port ${port}.`)
         }
       }

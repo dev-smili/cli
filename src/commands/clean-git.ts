@@ -29,7 +29,15 @@ const main = defineCommand({
     },
   },
   async run({ args }) {
-    const branches = getStaleBranches()
+    let branches: string[]
+    try {
+      branches = getStaleBranches()
+    } catch {
+      console.error(
+        'Could not check for stale branches. Make sure you are in a git repository with a configured remote.',
+      )
+      process.exit(1)
+    }
 
     if (branches.length === 0) {
       console.log('No stale branches to clean up.')

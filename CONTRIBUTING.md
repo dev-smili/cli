@@ -24,11 +24,14 @@ The repo ships a devcontainer with Node, TypeScript, and [Biome][biome] preconfi
 
 ### Option B: Manual setup
 
-Install [Node.js][nodejs] (Node 24 is the minimum supported version), then install the dependencies:
+Install [Node.js][nodejs], then install the dependencies:
 
 ```bash
 npm install
 ```
+
+> [!NOTE]
+> Local development requires **Node 24+**, because the CLI is run straight from its TypeScript source via Node's native type stripping. The **published** package is compiled to JavaScript and supports **Node 20+** (see `engines` in [package.json](./package.json)).
 
 ## 2. Making changes
 
@@ -64,7 +67,7 @@ Changes land on `main` through squash-merged pull requests, so the PR — NOT yo
 
 <br>
 
-> [!IMPORTANT]
+> [!NOTE]
 > Each PR should generally be a single logical change to the codebase, as this keeps review focused and the history clean. If your work is incomplete or you'd like early feedback, open a **draft PR** to start the discussion before requesting a merge.
 
 ## Releasing changes

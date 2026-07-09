@@ -66,6 +66,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Smoke test built binary
+        run: node dist/main.js --help
+
   # ─────────────────────────────────────────────────────────────
   # Gate: All checks passed
   # ─────────────────────────────────────────────────────────────
