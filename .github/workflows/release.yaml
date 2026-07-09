@@ -35,11 +35,12 @@ jobs:
   preview:
     name: Preview (dry run)
     runs-on: ubuntu-latest
-    # No environment (so no approval) and no npm/GitHub credentials needed: the reduced
-    # plugin set below only analyzes commits and generates notes, which requires nothing
-    # beyond the git history fetched at checkout.
+    # No environment, so no approval prompt (approval is gated by `environment:`, not by
+    # permissions). `contents: write` is required because semantic-release core verifies
+    # push access with a `git push --dry-run` even in --dry-run mode; that push writes
+    # nothing, and the reduced plugin set below needs no npm/GitHub credentials.
     permissions:
-      contents: read
+      contents: write
     outputs:
       version: ${{ steps.preview.outputs.version }}
     steps:
