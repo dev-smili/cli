@@ -2,14 +2,14 @@ name: Release Package
 
 # Manually triggered from the Actions tab. This workflow runs in three stages:
 #
-#   1. preview   — Always runs. Executes semantic-release in --dry-run mode with only the
+#   1. preview — Always runs. Executes semantic-release in --dry-run mode with only the
 #      analysis plugins to work out the next version (or that there is no release), and
 #      surfaces it in the job summary and as a notice annotation. Requires no approval
 #      because it declares no environment and needs no npm/GitHub credentials.
 #   2. handshake — Only runs when `expected_version` is provided. Fails (before any
 #      approval prompt) if the version the preview resolved does not match the version
 #      you said you expected — a human/semantic-release confirmation step.
-#   3. release   — Only runs when `expected_version` is provided and the handshake passed.
+#   3. release — Only runs when `expected_version` is provided and the handshake passed.
 #      Publishes to npm (OIDC trusted publishing, with provenance), creates the git tag,
 #      and publishes a GitHub Release. Gated by the `production` environment, which is
 #      where the approval prompt comes from.
