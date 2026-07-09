@@ -1,19 +1,28 @@
 name: Release Package
 
-# Manually triggered from the Actions tab. semantic-release analyzes the Conventional
-# Commits merged into main since the last release, then determines the next version,
-# publishes to npm (OIDC trusted publishing, with provenance), creates the git tag, and
-# publishes a GitHub Release with generated notes.
+# Manually triggered from the Actions tab. This workflow runs in three stages:
 #
-# Set the `dry_run` input to preview the next version and release notes without
-# publishing, tagging, or creating a GitHub Release.
+#   1. preview   — Always runs. Executes semantic-release in --dry-run mode with only the
+#      analysis plugins to work out the next version (or that there is no release), and
+#      surfaces it in the job summary and as a notice annotation. Requires no approval
+#      because it declares no environment and needs no npm/GitHub credentials.
+#   2. handshake — Only runs when `expected_version` is provided. Fails (before any
+#      approval prompt) if the version the preview resolved does not match the version
+#      you said you expected — a human/semantic-release confirmation step.
+#   3. release   — Only runs when `expected_version` is provided and the handshake passed.
+#      Publishes to npm (OIDC trusted publishing, with provenance), creates the git tag,
+#      and publishes a GitHub Release. Gated by the `production` environment, which is
+#      where the approval prompt comes from.
+#
+# Leave `expected_version` blank to only preview (no publish, tag, or GitHub Release).
 on:
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: Dry run (preview only — no publish, tag, or GitHub Release)
-        type: boolean
-        default: false
+      expected_version:
+        description: Version you expect to publish, e.g. 1.0.1. Leave blank to only preview (dry run).
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: release
@@ -23,8 +32,91 @@ permissions:
   contents: read
 
 jobs:
+  preview:
+    name: Preview (dry run)
+    runs-on: ubuntu-latest
+    # No environment (so no approval) and no npm/GitHub credentials needed: the reduced
+    # plugin set below only analyzes commits and generates notes, which requires nothing
+    # beyond the git history fetched at checkout.
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.preview.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0 # full history + tags so semantic-release can find the last release
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Override the configured plugins with just the analysis plugins. Version resolution
+      # is identical (it depends on commit-analyzer + git tags, not on npm/github), but
+      # dropping @semantic-release/npm and @semantic-release/github means no npm token,
+      # OIDC exchange, or `production` environment is required — so no approval prompt.
+      - name: Preview release (dry run)
+        id: preview
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -o pipefail
+          npx semantic-release --dry-run \
+            --plugins @semantic-release/commit-analyzer @semantic-release/release-notes-generator \
+            2>&1 | tee release.log
+          VERSION=$(grep -oE 'next release version is [0-9]+\.[0-9]+\.[0-9]+' release.log \
+            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          {
+            echo "## semantic-release — preview"
+            echo ""
+            if [ -n "$VERSION" ]; then
+              echo "**Next version:** \`$VERSION\`"
+            else
+              echo "**No release** — no qualifying commits since the last release."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$VERSION" ]; then
+            echo "::notice title=semantic-release::Preview → next version $VERSION"
+          else
+            echo "::notice title=semantic-release::Preview → no release (no qualifying commits)"
+          fi
+
+  handshake:
+    name: Verify version handshake
+    needs: preview
+    if: ${{ inputs.expected_version != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Runs before the release job's environment approval, so a mismatch aborts early
+      # without wasting an approval.
+      - name: Compare expected vs resolved version
+        env:
+          EXPECTED: ${{ inputs.expected_version }}
+          RESOLVED: ${{ needs.preview.outputs.version }}
+        run: |
+          if [ -z "$RESOLVED" ]; then
+            echo "::error::You expected $EXPECTED, but semantic-release resolved no release (no qualifying commits). Aborting before approval."
+            exit 1
+          fi
+          if [ "$RESOLVED" != "$EXPECTED" ]; then
+            echo "::error::Version mismatch — you expected $EXPECTED but semantic-release resolved $RESOLVED. Aborting before approval."
+            exit 1
+          fi
+          echo "Handshake OK: semantic-release resolved \`$RESOLVED\`, matching the expected version." >> "$GITHUB_STEP_SUMMARY"
+
   release:
     name: Release
+    needs: [preview, handshake]
+    if: ${{ inputs.expected_version != '' }}
     runs-on: ubuntu-latest
     environment: production # must match the environment set on the npm trusted publisher
     permissions:
@@ -62,10 +154,17 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          if [ "$DRY_RUN" = "true" ]; then
-            npx semantic-release --dry-run
-          else
-            npx semantic-release
-          fi
+          set -o pipefail
+          npx semantic-release 2>&1 | tee release.log
+          VERSION=$(grep -oE 'Published release [0-9]+\.[0-9]+\.[0-9]+' release.log \
+            | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
+          {
+            echo "## semantic-release — release"
+            echo ""
+            if [ -n "$VERSION" ]; then
+              echo "**Published:** \`$VERSION\`"
+            else
+              echo "**No release published.**"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
