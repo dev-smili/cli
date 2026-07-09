@@ -41,7 +41,7 @@ export function findListeningPids(port: string): string[] {
 const main = defineCommand({
   meta: {
     name: 'free-port',
-    description: 'Kill any process listening on the given TCP port',
+    description: 'Gracefully terminate any process listening on the given TCP port',
   },
   args: {
     port: {
@@ -52,6 +52,12 @@ const main = defineCommand({
   },
   run({ args }) {
     const port = args.port
+    const portNumber = Number(port)
+
+    if (!Number.isInteger(portNumber) || portNumber < 1 || portNumber > 65535) {
+      console.error(`Invalid port: ${port}. Provide a number between 1 and 65535.`)
+      process.exit(1)
+    }
 
     try {
       const pids = findListeningPids(port)

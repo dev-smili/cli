@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process'
+import { execFileSync, execSync } from 'node:child_process'
 import { cancel, intro, isCancel, multiselect, outro } from '@clack/prompts'
 import { defineCommand } from 'citty'
 
@@ -38,7 +38,7 @@ const main = defineCommand({
 
     if (args.force) {
       for (const branch of branches) {
-        execSync(`git branch -D ${branch}`, { stdio: 'inherit' })
+        execFileSync('git', ['branch', '-D', branch], { stdio: 'inherit' })
       }
       console.log(`Deleted ${branches.length} branch(es).`)
       return
@@ -63,7 +63,7 @@ const main = defineCommand({
     }
 
     for (const branch of selected) {
-      execSync(`git branch -D ${branch}`, { stdio: 'inherit' })
+      execFileSync('git', ['branch', '-D', branch], { stdio: 'inherit' })
     }
 
     outro(`Deleted ${selected.length} branch(es).`)

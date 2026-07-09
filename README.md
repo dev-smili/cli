@@ -25,7 +25,7 @@ smili free-port 5173
 | ------------------------- | --------------------------------------------------------------- |
 | `smili clean-git`         | Interactively remove local branches whose remote tracking branch was deleted. |
 | `smili clean-git --force` | Delete all stale branches without the interactive prompt.       |
-| `smili free-port <port>`  | Ends any process listening on the given TCP port.               |
+| `smili free-port <port>`  | Gracefully terminate any process listening on the given TCP port.               |
 
 ## Contributions
 
