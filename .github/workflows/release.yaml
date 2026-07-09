@@ -32,6 +32,10 @@ permissions:
   contents: read
 
 jobs:
+
+  # ─────────────────────────────────────────────────────────────
+  # Preview release via semantic-release --dry-run
+  # ─────────────────────────────────────────────────────────────
   preview:
     name: Preview
     runs-on: ubuntu-latest
@@ -75,7 +79,7 @@ jobs:
             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           {
-            echo "## semantic-release — preview"
+            echo "## semantic-release --dry-run"
             echo ""
             if [ -n "$VERSION" ]; then
               echo "**Next version:** \`$VERSION\`"
@@ -84,6 +88,9 @@ jobs:
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
+  # ─────────────────────────────────────────────────────────────
+  # Verify user expected version against semantic-release version
+  # ─────────────────────────────────────────────────────────────
   handshake:
     name: Verify Version
     needs: preview
@@ -104,11 +111,14 @@ jobs:
             exit 1
           fi
           if [ "$RESOLVED" != "$EXPECTED" ]; then
-            echo "::error::Version mismatch — you expected $EXPECTED but semantic-release resolved $RESOLVED. Aborting before approval."
+            echo "::error::You expected $EXPECTED, but semantic-release resolved $RESOLVED. Aborting before approval."
             exit 1
           fi
-          echo "Handshake OK: semantic-release resolved \`$RESOLVED\`, matching the expected version." >> "$GITHUB_STEP_SUMMARY"
+          echo "Version Verified: semantic-release resolved \`$RESOLVED\`, matching the expected version." >> "$GITHUB_STEP_SUMMARY"
 
+  # ─────────────────────────────────────────────────────────────
+  # Release package via semantic-release
+  # ─────────────────────────────────────────────────────────────
   release:
     name: Release
     needs: [preview, handshake]
@@ -156,7 +166,7 @@ jobs:
           VERSION=$(grep -oE 'Published release [0-9]+\.[0-9]+\.[0-9]+' release.log \
             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
           {
-            echo "## semantic-release — release"
+            echo "## semantic-release"
             echo ""
             if [ -n "$VERSION" ]; then
               echo "**Published:** \`$VERSION\`"
