@@ -1,0 +1,55 @@
+{
+  "name": "@dev-smili/cli",
+  "version": "0.0.0",
+  "description": "Everyday developer utilities",
+  "keywords": [
+    "cli",
+    "devtools",
+    "git",
+    "port",
+    "developer-experience"
+  ],
+  "license": "MIT",
+  "author": "Daniel Reichl",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-smili/cli.git"
+  },
+  "homepage": "https://github.com/dev-smili/cli#readme",
+  "bugs": {
+    "url": "https://github.com/dev-smili/cli/issues"
+  },
+  "type": "module",
+  "bin": {
+    "smili": "dist/main.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "smili": "node src/main.ts",
+    "build": "tsdown",
+    "check": "biome check . && tsc --noEmit",
+    "check:fix": "biome check . --write && tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.7.0",
+    "citty": "0.2.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.2",
+    "@types/node": "24.13.2",
+    "semantic-release": "25.0.5",
+    "tsdown": "0.22.4",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

@@ -1,0 +1,22 @@
+// https://aka.ms/devcontainer.json
+{
+  "name": "smili",
+  // Node + TypeScript: https://github.com/devcontainers/images/tree/main/src/typescript-node
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli": {}
+  },
+  // Lifecycle Scripts: https://containers.dev/implementors/json_reference/#lifecycle-scripts
+  "postCreateCommand": "npm install",
+  // IDE Customizations
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "amodio.toggle-excluded-files",
+        "biomejs.biome",
+        "logerfo.open-all-files",
+        "mhutchie.git-graph"
+      ]
+    }
+  }
+}
