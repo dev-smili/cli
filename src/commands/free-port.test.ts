@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process'
 import { platform } from 'node:os'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import freePort, { findListeningPids, killProcess } from './free-port.ts'
+import freePort, { findListeningPids, terminateProcess } from './free-port.ts'
 
 vi.mock('node:child_process', () => ({
   execSync: vi.fn(),
@@ -81,7 +81,7 @@ describe('killProcess', () => {
     it('sends SIGTERM by default', () => {
       const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
 
-      killProcess('1234', false)
+      terminateProcess('1234', false)
 
       expect(kill).toHaveBeenCalledWith(1234, 'SIGTERM')
     })
@@ -89,7 +89,7 @@ describe('killProcess', () => {
     it('sends SIGKILL when force is set', () => {
       const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
 
-      killProcess('1234', true)
+      terminateProcess('1234', true)
 
       expect(kill).toHaveBeenCalledWith(1234, 'SIGKILL')
     })
@@ -101,7 +101,7 @@ describe('killProcess', () => {
     })
 
     it('uses taskkill without /F by default', () => {
-      killProcess('4321', false)
+      terminateProcess('4321', false)
 
       expect(mockedExecSync).toHaveBeenCalledWith(
         'taskkill /PID 4321',
@@ -110,7 +110,7 @@ describe('killProcess', () => {
     })
 
     it('adds /F when force is set', () => {
-      killProcess('4321', true)
+      terminateProcess('4321', true)
 
       expect(mockedExecSync).toHaveBeenCalledWith(
         'taskkill /PID 4321 /F',
@@ -152,7 +152,7 @@ describe('free-port command', () => {
     freePort.run?.({ args: { port: '3000', force: false } } as never)
 
     expect(error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to kill process 1234 on port 3000'),
+      expect.stringContaining('Failed to terminate process 1234 on port 3000'),
     )
   })
 })

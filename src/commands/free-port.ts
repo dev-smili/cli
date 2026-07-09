@@ -43,7 +43,7 @@ export function findListeningPids(port: string): string[] {
  * @param pid - The process ID to terminate
  * @param force - Use SIGKILL instead of SIGTERM when true
  */
-export function killProcess(pid: string, force: boolean): void {
+export function terminateProcess(pid: string, force: boolean): void {
   if (platform() === 'win32') {
     // taskkill defaults to a graceful close; `/F` forces termination.
     execSync(`taskkill /PID ${pid}${force ? ' /F' : ''}`, { stdio: 'ignore' })
@@ -94,13 +94,14 @@ const main = defineCommand({
 
     for (const pid of pids) {
       try {
-        killProcess(pid, args.force)
-        console.log(`Killed process ${pid} on port ${port}.`)
+        terminateProcess(pid, args.force)
+        const signal = args.force ? 'SIGKILL' : 'SIGTERM'
+        console.log(`Terminated process ${pid} on port ${port} (${signal}).`)
       } catch {
         const hint = args.force
           ? 'You may need elevated privileges.'
           : 'Try again with --force, or with elevated privileges.'
-        console.error(`Failed to kill process ${pid} on port ${port}. ${hint}`)
+        console.error(`Failed to terminate process ${pid} on port ${port}. ${hint}`)
       }
     }
   },
