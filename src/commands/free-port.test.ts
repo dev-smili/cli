@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process'
 import { platform } from 'node:os'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { findListeningPids } from './free-port.ts'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import freePort, { findListeningPids, killProcess } from './free-port.ts'
 
 vi.mock('node:child_process', () => ({
   execSync: vi.fn(),
@@ -61,5 +61,98 @@ describe('findListeningPids', () => {
 
       expect(findListeningPids('3000')).toEqual([])
     })
+  })
+})
+
+describe('killProcess', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  describe('on unix-like platforms', () => {
+    beforeEach(() => {
+      mockedPlatform.mockReturnValue('linux')
+    })
+
+    it('sends SIGTERM by default', () => {
+      const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
+
+      killProcess('1234', false)
+
+      expect(kill).toHaveBeenCalledWith(1234, 'SIGTERM')
+    })
+
+    it('sends SIGKILL when force is set', () => {
+      const kill = vi.spyOn(process, 'kill').mockReturnValue(true)
+
+      killProcess('1234', true)
+
+      expect(kill).toHaveBeenCalledWith(1234, 'SIGKILL')
+    })
+  })
+
+  describe('on windows', () => {
+    beforeEach(() => {
+      mockedPlatform.mockReturnValue('win32')
+    })
+
+    it('uses taskkill without /F by default', () => {
+      killProcess('4321', false)
+
+      expect(mockedExecSync).toHaveBeenCalledWith(
+        'taskkill /PID 4321',
+        expect.objectContaining({ stdio: 'ignore' }),
+      )
+    })
+
+    it('adds /F when force is set', () => {
+      killProcess('4321', true)
+
+      expect(mockedExecSync).toHaveBeenCalledWith(
+        'taskkill /PID 4321 /F',
+        expect.objectContaining({ stdio: 'ignore' }),
+      )
+    })
+  })
+})
+
+describe('free-port command', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('rejects an invalid port before touching the system', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit')
+    })
+
+    expect(() => freePort.run?.({ args: { port: 'abc' } } as never)).toThrow('exit')
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('Invalid port'))
+    expect(exit).toHaveBeenCalledWith(1)
+    expect(mockedExecSync).not.toHaveBeenCalled()
+  })
+
+  it('surfaces a distinct error when a process cannot be killed', () => {
+    mockedPlatform.mockReturnValue('linux')
+    mockedExecSync.mockReturnValue('1234')
+    vi.spyOn(process, 'kill').mockImplementation(() => {
+      throw new Error('EPERM')
+    })
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    freePort.run?.({ args: { port: '3000', force: false } } as never)
+
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to kill process 1234 on port 3000'),
+    )
   })
 })

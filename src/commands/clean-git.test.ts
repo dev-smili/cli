@@ -1,9 +1,10 @@
 import { execSync } from 'node:child_process'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getStaleBranches } from './clean-git.ts'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import cleanGit, { getStaleBranches } from './clean-git.ts'
 
 vi.mock('node:child_process', () => ({
   execSync: vi.fn(),
+  execFileSync: vi.fn(),
 }))
 
 const mockedExecSync = vi.mocked(execSync)
@@ -45,5 +46,33 @@ describe('getStaleBranches', () => {
       'git fetch --prune',
       expect.objectContaining({ stdio: 'pipe' }),
     )
+  })
+})
+
+describe('clean-git command', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('exits with a friendly message when the git fetch fails', async () => {
+    mockedExecSync.mockImplementation(() => {
+      throw new Error('fatal: No remote repository specified.')
+    })
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('exit')
+    })
+
+    await expect(cleanGit.run?.({ args: { force: false } } as never)).rejects.toThrow(
+      'exit',
+    )
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('Could not check for stale branches'),
+    )
+    expect(exit).toHaveBeenCalledWith(1)
   })
 })

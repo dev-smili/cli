@@ -16,6 +16,24 @@ export function getStaleBranches(): string[] {
     .filter(Boolean)
 }
 
+/**
+ * Force-deletes the given local branches, continuing past any that fail.
+ * @param branches - Branch names to delete
+ * @returns The number of branches successfully deleted
+ */
+function deleteBranches(branches: string[]): number {
+  let deleted = 0
+  for (const branch of branches) {
+    try {
+      execFileSync('git', ['branch', '-D', branch], { stdio: 'inherit' })
+      deleted++
+    } catch {
+      console.error(`Failed to delete branch '${branch}'.`)
+    }
+  }
+  return deleted
+}
+
 const main = defineCommand({
   meta: {
     name: 'clean-git',
@@ -45,10 +63,8 @@ const main = defineCommand({
     }
 
     if (args.force) {
-      for (const branch of branches) {
-        execFileSync('git', ['branch', '-D', branch], { stdio: 'inherit' })
-      }
-      console.log(`Deleted ${branches.length} branch(es).`)
+      const deleted = deleteBranches(branches)
+      console.log(`Deleted ${deleted} branch(es).`)
       return
     }
 
@@ -70,11 +86,9 @@ const main = defineCommand({
       return
     }
 
-    for (const branch of selected) {
-      execFileSync('git', ['branch', '-D', branch], { stdio: 'inherit' })
-    }
+    const deleted = deleteBranches(selected)
 
-    outro(`Deleted ${selected.length} branch(es).`)
+    outro(`Deleted ${deleted} branch(es).`)
   },
 })
 

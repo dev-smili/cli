@@ -38,6 +38,21 @@ export function findListeningPids(port: string): string[] {
   return output.split('\n')
 }
 
+/**
+ * Terminates a process by PID.
+ * @param pid - The process ID to terminate
+ * @param force - Use SIGKILL instead of SIGTERM when true
+ */
+export function killProcess(pid: string, force: boolean): void {
+  if (platform() === 'win32') {
+    // taskkill defaults to a graceful close; `/F` forces termination.
+    execSync(`taskkill /PID ${pid}${force ? ' /F' : ''}`, { stdio: 'ignore' })
+    return
+  }
+
+  process.kill(Number(pid), force ? 'SIGKILL' : 'SIGTERM')
+}
+
 const main = defineCommand({
   meta: {
     name: 'free-port',
@@ -51,7 +66,7 @@ const main = defineCommand({
     },
     force: {
       type: 'boolean',
-      description: 'Forcefully terminate (SIGKILL) any process on the given TCP port',
+      description: 'Use SIGKILL instead of the default SIGTERM',
       default: false,
     },
   },
@@ -64,30 +79,29 @@ const main = defineCommand({
       process.exit(1)
     }
 
+    let pids: string[]
     try {
-      const pids = findListeningPids(port)
-
-      if (pids.length === 0) {
-        console.log(`No process listening on port ${port}.`)
-        return
-      }
-
-      if (platform() === 'win32') {
-        for (const pid of pids) {
-          // taskkill defaults to a graceful close; `/F` forces termination.
-          const taskkillArgs = args.force ? `/PID ${pid} /F` : `/PID ${pid}`
-          execSync(`taskkill ${taskkillArgs}`, { stdio: 'ignore' })
-          console.log(`Killed process ${pid} on port ${port}.`)
-        }
-      } else {
-        const signal = args.force ? 'SIGKILL' : 'SIGTERM'
-        for (const pid of pids) {
-          process.kill(Number(pid), signal)
-          console.log(`Killed process ${pid} on port ${port}.`)
-        }
-      }
+      pids = findListeningPids(port)
     } catch {
+      // Some platforms' lookup commands exit non-zero when nothing matches.
+      pids = []
+    }
+
+    if (pids.length === 0) {
       console.log(`No process listening on port ${port}.`)
+      return
+    }
+
+    for (const pid of pids) {
+      try {
+        killProcess(pid, args.force)
+        console.log(`Killed process ${pid} on port ${port}.`)
+      } catch {
+        const hint = args.force
+          ? 'You may need elevated privileges.'
+          : 'Try again with --force, or with elevated privileges.'
+        console.error(`Failed to kill process ${pid} on port ${port}. ${hint}`)
+      }
     }
   },
 })
