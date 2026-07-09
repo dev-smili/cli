@@ -39,11 +39,11 @@ export function findListeningPids(port: string): string[] {
 }
 
 /**
- * Terminates a process by PID.
- * @param pid - The process ID to terminate
- * @param force - Use SIGKILL instead of SIGTERM when true
+ * Ends a process by PID.
+ * @param pid - The process ID to end
+ * @param force - Use SIGKILL (forceful) instead of SIGTERM (graceful) when true
  */
-export function terminateProcess(pid: string, force: boolean): void {
+export function endProcess(pid: string, force: boolean): void {
   if (platform() === 'win32') {
     // taskkill defaults to a graceful close; `/F` forces termination.
     execSync(`taskkill /PID ${pid}${force ? ' /F' : ''}`, { stdio: 'ignore' })
@@ -56,7 +56,7 @@ export function terminateProcess(pid: string, force: boolean): void {
 const main = defineCommand({
   meta: {
     name: 'free-port',
-    description: 'Gracefully terminate (SIGTERM) any process on the given TCP port',
+    description: 'Gracefully end (SIGTERM) any process on the given TCP port',
   },
   args: {
     port: {
@@ -66,7 +66,7 @@ const main = defineCommand({
     },
     force: {
       type: 'boolean',
-      description: 'Use SIGKILL instead of the default SIGTERM',
+      description: 'Forcefully end (SIGKILL) instead of the default graceful SIGTERM',
       default: false,
     },
   },
@@ -94,14 +94,14 @@ const main = defineCommand({
 
     for (const pid of pids) {
       try {
-        terminateProcess(pid, args.force)
+        endProcess(pid, args.force)
         const signal = args.force ? 'SIGKILL' : 'SIGTERM'
-        console.log(`Terminated process ${pid} on port ${port} (${signal}).`)
+        console.log(`Ended process ${pid} on port ${port} (${signal}).`)
       } catch {
         const hint = args.force
           ? 'You may need elevated privileges.'
           : 'Try again with --force, or with elevated privileges.'
-        console.error(`Failed to terminate process ${pid} on port ${port}. ${hint}`)
+        console.error(`Failed to end process ${pid} on port ${port}. ${hint}`)
       }
     }
   },
