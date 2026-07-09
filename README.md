@@ -30,5 +30,4 @@ smili free-port 5173
 
 ## Contributions
 
-Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development
-setup, workflow, and release process.
+Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for the development setup, workflow, and release process.
