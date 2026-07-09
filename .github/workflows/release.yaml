@@ -114,7 +114,6 @@ jobs:
             echo "::error::You expected $EXPECTED, but semantic-release resolved $RESOLVED. Aborting before approval."
             exit 1
           fi
-          echo "Version Verified: semantic-release resolved \`$RESOLVED\`, matching the expected version." >> "$GITHUB_STEP_SUMMARY"
 
   # ─────────────────────────────────────────────────────────────
   # Release package via semantic-release
