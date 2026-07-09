@@ -40,7 +40,7 @@ jobs:
           requireScope: false
 
   check:
-    name: Lint, Type Check, Test & Build
+    name: Lint, Type Check, Test, Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
