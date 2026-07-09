@@ -4,8 +4,8 @@ name: Release Package
 #
 #   1. preview — Always runs. Executes semantic-release in --dry-run mode with only the
 #      analysis plugins to work out the next version (or that there is no release), and
-#      surfaces it in the job summary and as a notice annotation. Requires no approval
-#      because it declares no environment and needs no npm/GitHub credentials.
+#      surfaces it in the job summary. Requires no approval because it declares no
+#      environment and needs no npm/GitHub credentials.
 #   2. handshake — Only runs when `expected_version` is provided. Fails (before any
 #      approval prompt) if the version the preview resolved does not match the version
 #      you said you expected — a human/semantic-release confirmation step.
@@ -32,8 +32,12 @@ permissions:
   contents: read
 
 jobs:
+
+  # ─────────────────────────────────────────────────────────────
+  # Preview release via semantic-release --dry-run
+  # ─────────────────────────────────────────────────────────────
   preview:
-    name: Preview (dry run)
+    name: Preview
     runs-on: ubuntu-latest
     # No environment, so no approval prompt (approval is gated by `environment:`, not by
     # permissions). `contents: write` is required because semantic-release core verifies
@@ -75,7 +79,7 @@ jobs:
             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           {
-            echo "## semantic-release — preview"
+            echo "## semantic-release --dry-run"
             echo ""
             if [ -n "$VERSION" ]; then
               echo "**Next version:** \`$VERSION\`"
@@ -83,14 +87,12 @@ jobs:
               echo "**No release** — no qualifying commits since the last release."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ -n "$VERSION" ]; then
-            echo "::notice title=semantic-release::Preview → next version $VERSION"
-          else
-            echo "::notice title=semantic-release::Preview → no release (no qualifying commits)"
-          fi
 
+  # ─────────────────────────────────────────────────────────────
+  # Verify user expected version against semantic-release version
+  # ─────────────────────────────────────────────────────────────
   handshake:
-    name: Verify version handshake
+    name: Verify Version
     needs: preview
     if: ${{ inputs.expected_version != '' }}
     runs-on: ubuntu-latest
@@ -109,11 +111,14 @@ jobs:
             exit 1
           fi
           if [ "$RESOLVED" != "$EXPECTED" ]; then
-            echo "::error::Version mismatch — you expected $EXPECTED but semantic-release resolved $RESOLVED. Aborting before approval."
+            echo "::error::You expected $EXPECTED, but semantic-release resolved $RESOLVED. Aborting before approval."
             exit 1
           fi
-          echo "Handshake OK: semantic-release resolved \`$RESOLVED\`, matching the expected version." >> "$GITHUB_STEP_SUMMARY"
+          echo "Version Verified: semantic-release resolved \`$RESOLVED\`, matching the expected version." >> "$GITHUB_STEP_SUMMARY"
 
+  # ─────────────────────────────────────────────────────────────
+  # Release package via semantic-release
+  # ─────────────────────────────────────────────────────────────
   release:
     name: Release
     needs: [preview, handshake]
@@ -161,7 +166,7 @@ jobs:
           VERSION=$(grep -oE 'Published release [0-9]+\.[0-9]+\.[0-9]+' release.log \
             | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | tail -1 || true)
           {
-            echo "## semantic-release — release"
+            echo "## semantic-release"
             echo ""
             if [ -n "$VERSION" ]; then
               echo "**Published:** \`$VERSION\`"

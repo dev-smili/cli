@@ -12,6 +12,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+
+  # ─────────────────────────────────────────────────────────────
+  # Validate PR title follows Conventional Commits
+  # ─────────────────────────────────────────────────────────────
   commitlint:
     name: Commit Lint
     # Only PRs carry a title to validate (skips workflow_dispatch runs).
@@ -39,6 +44,9 @@ jobs:
             revert
           requireScope: false
 
+  # ─────────────────────────────────────────────────────────────
+  # Run standard checks to ensure code quality
+  # ─────────────────────────────────────────────────────────────
   check:
     name: Lint, Type Check, Test, Build
     runs-on: ubuntu-latest
