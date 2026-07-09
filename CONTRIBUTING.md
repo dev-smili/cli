@@ -43,10 +43,10 @@ Once you're set up, here's what to keep in mind as you work:
 - **Type checking** — Types are checked by the [TypeScript][typescript] compiler. Run `npm run typecheck` to type-check without emitting output.
 - **Tests** — Add or update tests for your changes and keep them passing. Tests live alongside the code in `*.test.ts` files and run with [Vitest][vitest] via `npm run test`.
 
-  <br>
+<br>
 
-  > [!NOTE]
-  > Run `npm run check` to do all of the above at once — lint, type-check, and tests together, matching CI.
+> [!NOTE]
+> Run `npm run check` to do all of the above at once — lint, type-check, and tests together, matching CI.
 
 
 Beyond the checks above, a couple of habits keep day-to-day work smooth:
