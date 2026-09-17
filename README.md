@@ -9,6 +9,7 @@ Run it on demand with `npx`:
 ```bash
 npx @dev-smili/cli clean-git
 npx @dev-smili/cli free-port 5173
+npx @dev-smili/cli login-gh
 ```
 
 Or install it globally to get the `smili` binary:
@@ -27,6 +28,7 @@ smili free-port 5173
 | `smili clean-git --force` | Delete all stale branches without the interactive prompt.       |
 | `smili free-port <port>`  | Gracefully end (SIGTERM) any process on the given TCP port.               |
 | `smili free-port <port> --force` | Forcefully end (SIGKILL) any process on the given TCP port.        |
+| `smili login-gh`           | Authenticate the GitHub CLI and configure Git credential integration. |
 
 ## Contributions
 
