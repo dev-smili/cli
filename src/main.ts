@@ -2,6 +2,7 @@
 import { defineCommand, runMain } from 'citty'
 import cleanGit from './commands/clean-git.ts'
 import freePort from './commands/free-port.ts'
+import loginGh from './commands/login-gh.ts'
 
 const main = defineCommand({
   meta: {
@@ -11,6 +12,7 @@ const main = defineCommand({
   subCommands: {
     'clean-git': cleanGit,
     'free-port': freePort,
+    'login-gh': loginGh,
   },
 })
 
