@@ -76,7 +76,7 @@ const main = defineCommand({
       initialValues: branches,
     })
 
-    if (isCancel(selected)) {
+    if (isCancel(selected) || !Array.isArray(selected)) {
       cancel('Cancelled.')
       process.exit(0)
     }
